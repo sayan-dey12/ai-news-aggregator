@@ -48,6 +48,17 @@ class YouTubeScraper:
         return f"https://www.youtube.com/feeds/videos.xml?channel_id={channel_id}"
     
     
+    def get_transcript(self, video_id: str) -> Optional[Transcript]:
+        try:
+            transcript = self.transcript_api.fetch(video_id)
+            text = " ".join([snippet.text for snippet in transcript.snippets])
+            return Transcript(text=text)
+        except (TranscriptsDisabled, NoTranscriptFound):
+            return None
+        except Exception:
+            return None
+    
+    
     def get_latest_videos(
         self,
         channel_id: str,
@@ -101,5 +112,8 @@ if __name__ == "__main__":
         "UCNQ6FEtztATuaVhZKCY28Yw"
     )
 
-    print(videos)
+    transcript: Transcript = scraper.get_transcript("jqd6_bbjhS8")
+    print(transcript)
+    
+    #print(videos)
         
