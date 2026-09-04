@@ -47,6 +47,18 @@ class YouTubeScraper:
     def _get_rss_url(self, channel_id: str) -> str:
         return f"https://www.youtube.com/feeds/videos.xml?channel_id={channel_id}"
     
+    
+    def get_transcript(self, video_id: str) -> Optional[Transcript]:
+        try:
+            transcript = self.transcript_api.fetch(video_id)
+            text = " ".join([snippet.text for snippet in transcript.snippets])
+            return Transcript(text=text)
+        except (TranscriptsDisabled, NoTranscriptFound):
+            return None
+        except Exception:
+            return None
+    
+    
     def get_latest_videos(
         self,
         channel_id: str,
@@ -65,9 +77,6 @@ class YouTubeScraper:
         videos = []
 
         for entry in feed.entries:
-
-            if "/shorts/" in entry.link:
-                continue
 
             published_time = datetime(
                 *entry.published_parsed[:6],
@@ -94,14 +103,40 @@ class YouTubeScraper:
                 )
 
         return videos
+    
+    
+    def scrape_channel(self, channel_id: str, hours: int = 230) -> list[ChannelVideo]:
+        videos = self.get_latest_videos(channel_id, hours)
+        result = []
+        for video in videos:
+            transcript = self.get_transcript(video.video_id)
+            result.append(
+                video.model_copy(
+                    update={"transcript": transcript.text if transcript else None}
+                )
+            )
+        return result
 
 
 if __name__ == "__main__":
     scraper = YouTubeScraper()
 
-    videos = scraper.get_latest_videos(
-        "UCNQ6FEtztATuaVhZKCY28Yw"
-    )
+    # videos = scraper.get_latest_videos(
+    #     "UCNQ6FEtztATuaVhZKCY28Yw"
+    # )
 
-    print(videos)
-        
+    # transcript: Transcript = scraper.get_transcript("jqd6_bbjhS8")
+    # print(transcript)
+    
+    #print(videos)
+    # UCNQ6FEtztATuaVhZKCY28Yw
+    result = scraper.scrape_channel("UCn8ujwUInbJkBhffxqAPBVQ")
+
+    for video in result:
+        print("=" * 80)
+        print(f"Title       : {video.title}")
+        print(f"Video ID    : {video.video_id}")
+        print(f"URL         : {video.url}")
+        print(f"Published   : {video.published_at}")
+        # print(f"Description : {video.description}")
+        print(f"Transcript  : {video.transcript}")
