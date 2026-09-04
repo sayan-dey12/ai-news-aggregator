@@ -53,9 +53,21 @@ class OpenAIScraper:
         return articles
     
     
+    def url_to_markdown(self, url: str) -> Optional[str]:
+            try:
+                result = self.converter.convert(url)
+                return result.document.export_to_markdown()
+            except Exception:
+                return None
+    
+    
+    
+    
 if __name__ == "__main__":
     
     scraper = OpenAIScraper()
-    articles : List[OpenAIArticle] = scraper.get_articles()
-    print(articles)
+    articles : List[OpenAIArticle] = scraper.get_articles(hours=48)
+    #print(articles)
+    markdown: str = scraper.url_to_markdown(articles[0].url)
+    print(markdown)
     
