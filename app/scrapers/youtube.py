@@ -47,6 +47,7 @@ class YouTubeScraper:
     def _get_rss_url(self, channel_id: str) -> str:
         return f"https://www.youtube.com/feeds/videos.xml?channel_id={channel_id}"
     
+    
     def get_latest_videos(
         self,
         channel_id: str,
@@ -65,9 +66,6 @@ class YouTubeScraper:
         videos = []
 
         for entry in feed.entries:
-
-            if "/shorts/" in entry.link:
-                continue
 
             published_time = datetime(
                 *entry.published_parsed[:6],
