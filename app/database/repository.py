@@ -67,4 +67,59 @@ class Repository:
         return article
     
     
+    def bulk_create_youtube_videos(self, videos: List[dict]) -> int:
+        new_videos = []
+        for v in videos:
+            existing = self.session.query(YouTubeVideo).filter_by(video_id=v["video_id"]).first()
+            if not existing:
+                new_videos.append(YouTubeVideo(
+                    video_id=v["video_id"],
+                    title=v["title"],
+                    url=v["url"],
+                    channel_id=v.get("channel_id", ""),
+                    published_at=v["published_at"],
+                    description=v.get("description", ""),
+                    transcript=v.get("transcript")
+                ))
+        if new_videos:
+            self.session.add_all(new_videos)
+            self.session.commit()
+        return len(new_videos)
+    
+    def bulk_create_openai_articles(self, articles: List[dict]) -> int:
+        new_articles = []
+        for a in articles:
+            existing = self.session.query(OpenAIArticle).filter_by(guid=a["guid"]).first()
+            if not existing:
+                new_articles.append(OpenAIArticle(
+                    guid=a["guid"],
+                    title=a["title"],
+                    url=a["url"],
+                    published_at=a["published_at"],
+                    description=a.get("description", ""),
+                    category=a.get("category")
+                ))
+        if new_articles:
+            self.session.add_all(new_articles)
+            self.session.commit()
+        return len(new_articles)
+    
+    def bulk_create_anthropic_articles(self, articles: List[dict]) -> int:
+        new_articles = []
+        for a in articles:
+            existing = self.session.query(AnthropicArticle).filter_by(guid=a["guid"]).first()
+            if not existing:
+                new_articles.append(AnthropicArticle(
+                    guid=a["guid"],
+                    title=a["title"],
+                    url=a["url"],
+                    published_at=a["published_at"],
+                    description=a.get("description", ""),
+                    category=a.get("category")
+                ))
+        if new_articles:
+            self.session.add_all(new_articles)
+            self.session.commit()
+        return len(new_articles)
+    
     
