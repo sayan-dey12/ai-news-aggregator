@@ -4,7 +4,6 @@ from app.scrapers.openai import OpenAIScraper
 from app.scrapers.youtube import YouTubeScraper
 from app.config import YOUTUBE_CHANNELS
 
-from typing import List
 
 def run_scrapers(hours: int = 24) -> dict:
     
@@ -32,7 +31,7 @@ def run_scrapers(hours: int = 24) -> dict:
     
 if __name__ == "__main__":
     
-    result = run_scrapers(hours=150)
+    result = run_scrapers(hours=240)
     print(f"Anthropic articles: {len(result['anthropic'])}")
     print(f"OpenAI articles: {len(result['openai'])}")
     print(f"YouTube videos: {len(result['youtube'])}")
