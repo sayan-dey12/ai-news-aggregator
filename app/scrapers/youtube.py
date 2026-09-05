@@ -28,7 +28,17 @@ class ChannelVideo(BaseModel):
 class YouTubeScraper:
     
     def __init__(self):
-        self.transcript_api = YouTubeTranscriptApi()
+        proxy_config = None
+        proxy_username = os.getenv("PROXY_USERNAME")
+        proxy_password = os.getenv("PROXY_PASSWORD")
+        
+        if proxy_username and proxy_password:
+            proxy_config = WebshareProxyConfig(
+                proxy_username=proxy_username,
+                proxy_password=proxy_password
+            )
+        
+        self.transcript_api = YouTubeTranscriptApi(proxy_config=proxy_config)
         
         
     def _extract_video_id(self, video_url: str) -> str:
@@ -54,8 +64,17 @@ class YouTubeScraper:
             text = " ".join([snippet.text for snippet in transcript.snippets])
             return Transcript(text=text)
         except (TranscriptsDisabled, NoTranscriptFound):
+            # print(
+            #     f"[NO TRANSCRIPT] {video_id}: "
+            #     f"{type(e).__name__}: {e}"
+            # )
             return None
-        except Exception:
+
+        except Exception as e:
+            # print(
+            #     f"[ERROR] {video_id}: {type(e).__name__}: {e}"
+            #     f"{type(e).__name__}: {e}"
+            # )
             return None
     
     
@@ -133,9 +152,11 @@ if __name__ == "__main__":
     #result = scraper.scrape_channel("UCn8ujwUInbJkBhffxqAPBVQ")
     #result = scraper.scrape_channel("UCawZsQWqfGSbCI5yjkdVkTA")
     
-    result = scraper.get_latest_videos("UCawZsQWqfGSbCI5yjkdVkTA" , hours=24)
-
-    print(len(result))
+    # result = scraper.get_latest_videos("UCawZsQWqfGSbCI5yjkdVkTA" , hours=24)
+    # print(len(result))
+    
+    result_transcript = scraper.get_transcript("xdXLzFzxA9Q")
+    print(result_transcript)
     
     # for video in result:
     #     print("=" * 80)
