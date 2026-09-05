@@ -17,7 +17,7 @@ def run_scrapers(hours: int = 24) -> dict:
     video_dicts = []
     
     for channel_id in YOUTUBE_CHANNELS:
-        videos = youtube_scraper.get_latest_videos(channel_id, hours)
+        videos = youtube_scraper.get_latest_videos(channel_id, hours=24)
         youtube_videos.extend(videos)
         
         video_dicts.extend([
@@ -84,7 +84,7 @@ def run_scrapers(hours: int = 24) -> dict:
     
 if __name__ == "__main__":
     
-    result = run_scrapers(hours=24)
+    result = run_scrapers(hours=48)
     print(f"Anthropic articles: {len(result['anthropic'])}")
     print(f"OpenAI articles: {len(result['openai'])}")
     print(f"YouTube videos: {len(result['youtube'])}")

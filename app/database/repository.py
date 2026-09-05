@@ -123,3 +123,49 @@ class Repository:
         return len(new_articles)
     
     
+    def get_anthropic_articles_without_markdown(self, limit: Optional[int] = None) -> List[AnthropicArticle]:
+        query = self.session.query(AnthropicArticle).filter(AnthropicArticle.markdown.is_(None))
+        if limit:
+            query = query.limit(limit)
+        return query.all()
+    
+    def update_anthropic_article_markdown(self, guid: str, markdown: str) -> bool:
+        article = self.session.query(AnthropicArticle).filter_by(guid=guid).first()
+        if article:
+            article.markdown = markdown
+            self.session.commit()
+            return True
+        return False
+    
+    
+    def get_openai_articles_without_markdown(self, limit: Optional[int] = None) -> List[AnthropicArticle]:
+            query = self.session.query(OpenAIArticle).filter(OpenAIArticle.markdown.is_(None))
+            if limit:
+                query = query.limit(limit)
+            return query.all()
+        
+    def update_openai_article_markdown(self, guid: str, markdown: str) -> bool:
+        article = self.session.query(OpenAIArticle).filter_by(guid=guid).first()
+        if article:
+            article.markdown = markdown
+            self.session.commit()
+            return True
+        return False
+        
+    
+    def get_youtube_videos_without_transcript(self, limit: Optional[int] = None) -> List[YouTubeVideo]:
+        query = self.session.query(YouTubeVideo).filter(YouTubeVideo.transcript.is_(None))
+        if limit:
+            query = query.limit(limit)
+        return query.all()
+    
+    def update_youtube_video_transcript(self, video_id: str, transcript: str) -> bool:
+        video = self.session.query(YouTubeVideo).filter_by(video_id=video_id).first()
+        if video:
+            video.transcript = transcript
+            self.session.commit()
+            return True
+        return False
+    
+    
+    
