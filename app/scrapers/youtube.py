@@ -105,7 +105,7 @@ class YouTubeScraper:
         return videos
     
     
-    def scrape_channel(self, channel_id: str, hours: int = 230) -> list[ChannelVideo]:
+    def scrape_channel(self, channel_id: str, hours: int = 150) -> list[ChannelVideo]:
         videos = self.get_latest_videos(channel_id, hours)
         result = []
         for video in videos:
@@ -130,13 +130,20 @@ if __name__ == "__main__":
     
     #print(videos)
     # UCNQ6FEtztATuaVhZKCY28Yw
-    result = scraper.scrape_channel("UCn8ujwUInbJkBhffxqAPBVQ")
+    #result = scraper.scrape_channel("UCn8ujwUInbJkBhffxqAPBVQ")
+    #result = scraper.scrape_channel("UCawZsQWqfGSbCI5yjkdVkTA")
+    
+    result = scraper.get_latest_videos("UCawZsQWqfGSbCI5yjkdVkTA" , hours=24)
 
-    for video in result:
-        print("=" * 80)
-        print(f"Title       : {video.title}")
-        print(f"Video ID    : {video.video_id}")
-        print(f"URL         : {video.url}")
-        print(f"Published   : {video.published_at}")
-        # print(f"Description : {video.description}")
-        print(f"Transcript  : {video.transcript}")
+    print(len(result))
+    
+    # for video in result:
+    #     print("=" * 80)
+    #     print(f"Title       : {video.title}")
+    #     print(f"Video ID    : {video.video_id}")
+    #     print(f"URL         : {video.url}")
+    #     print(f"Published   : {video.published_at}")
+    #     # print(f"Description : {video.description}")
+    #     print(f"Transcript  : {video.transcript}")
+        
+    
