@@ -121,36 +121,50 @@ DO NOT use tables.
 DO NOT use ```json code fences.
 DO NOT include any explanation before or after the JSON.
 
-The output MUST have exactly this structure:
+ID RULES:
+
+- The "digest_id" MUST exactly match one of the IDs provided in the input.
+- Copy the digest ID exactly as provided.
+- Do NOT modify, reconstruct, shorten, or generate digest IDs.
+- Do NOT change the article_type prefix.
+- Every input digest must appear exactly once.
+- Do NOT create IDs that are not present in the input.
+
+RANKING RULES:
+
+- Rank every digest.
+- Rank 1 is the most relevant.
+- Rank {{len(digests)}} is the least relevant.
+- Every rank must be unique.
+- Use exactly one rank from 1 to {{len(digests)}} for each digest.
+
+SCORING RULES:
+
+- relevance_score must be between 0.0 and 10.0.
+- The score represents absolute relevance to the user's profile, not relative position.
+- Use the following scale:
+  9.0-10.0: Extremely relevant and directly aligned
+  7.0-8.9: Highly relevant
+  5.0-6.9: Moderately relevant
+  3.0-4.9: Somewhat relevant
+  0.0-2.9: Low relevance
+- Do not assign scores based on article rank alone.
+- Articles with similar relevance may have similar scores.
+
+OUTPUT STRUCTURE:
 
 {{
   "articles": [
     {{
-      "digest_id": "openai:example-id",
-      "relevance_score": 9.5,
+      "digest_id": "exact-id-from-input",
+      "relevance_score": 0.0,
       "rank": 1,
       "reasoning": "Brief explanation of relevance."
     }}
   ]
 }}
 
-{{
-  "articles": [
-    {{
-      "digest_id": "anthropic:example-id",
-      "relevance_score": 9.1,
-      "rank": 2,
-      "reasoning": "Brief explanation of relevance."
-    }}
-  ]
-}}
-
-
 The "articles" array MUST contain exactly one item for every digest provided.
-
-There are exactly 8 digests, so return exactly 8 ranking objects.
-
-Ranks must be unique integers from 1 to 8.
 """
 
     def rank_digests(
