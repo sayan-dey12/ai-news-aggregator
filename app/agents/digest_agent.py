@@ -69,9 +69,9 @@ class DigestAgent:
             content = response.choices[0].message.content
 
 
-            print("\n========== RAW MODEL RESPONSE ==========")
-            print(content)
-            print("========================================\n")
+            # print("\n========== RAW MODEL RESPONSE ==========")
+            # print(content)
+            # print("========================================\n")
 
             if not content:
                 return None
