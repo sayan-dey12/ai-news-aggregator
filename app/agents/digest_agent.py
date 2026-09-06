@@ -36,15 +36,51 @@ class DigestAgent:
         try:
             user_prompt = f"Create a digest for this {article_type}: \n Title: {title} \n Content: {content[:8000]}"
 
-            response = self.client.responses.parse(
+            response = self.client.chat.completions.create(
                 model=self.model,
-                instructions=self.system_prompt,
+                messages=[
+                    {
+                        "role": "system",
+                        "content": self.system_prompt,
+                    },
+                    {
+                        "role": "user",
+                        "content": user_prompt,
+                    },
+                ],
                 temperature=0.7,
-                input=user_prompt,
-                text_format=DigestOutput
+                response_format={
+                    "type": "json_schema",
+                    "json_schema": {
+                        "name": "digest_output",
+                        "strict": True,
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "title": {
+                                    "type": "string"
+                                },
+                                "summary": {
+                                    "type": "string"
+                                },
+                            },
+                            "required": [
+                                "title",
+                                "summary"
+                            ],
+                            "additionalProperties": False,
+                        },
+                    },
+                },
             )
-            
-            return response.output_parsed
+
+            content = response.choices[0].message.content
+
+            if not content:
+                return None
+
+            return DigestOutput.model_validate_json(content)
+
         except Exception as e:
             print(f"Error generating digest: {e}")
             return None
