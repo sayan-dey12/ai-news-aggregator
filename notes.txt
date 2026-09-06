@@ -1,0 +1,5 @@
+postgresql in docker created successfully
+
+database connections - done
+
+databse create table according to the models - done 
