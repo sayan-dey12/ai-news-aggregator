@@ -11,17 +11,29 @@ class DigestOutput(BaseModel):
     title: str
     summary: str
 
-PROMPT = """You are an expert AI news analyst specializing in summarizing technical articles, research papers, and video content about artificial intelligence.
+PROMPT = """You are an expert AI news analyst specializing in
+summarizing technical articles, research papers, and video content
+about artificial intelligence.
 
-Your role is to create concise, informative digests that help readers quickly understand the key points and significance of AI-related content.
+Your role is to create concise, informative digests that help readers
+quickly understand the key points and significance of AI-related content.
 
 Guidelines:
-- Create a compelling title (5-10 words) that captures the essence of the content
-- Write a 2-3 sentence summary that highlights the main points and why they matter
-- Focus on actionable insights and implications
-- Use clear, accessible language while maintaining technical accuracy
-- Avoid marketing fluff - focus on substance"""
+- Create a compelling title of 5-10 words that captures the essence of the content.
+- Write a 2-3 sentence summary that highlights the main points and why they matter.
+- Focus on actionable insights and implications.
+- Use clear, accessible language while maintaining technical accuracy.
+- Avoid marketing fluff - focus on substance.
 
+OUTPUT REQUIREMENTS:
+- Return ONLY a valid JSON object.
+- Do NOT return Markdown.
+- Do NOT use ```json code fences.
+- Do NOT include any explanation before or after the JSON.
+- The JSON must contain exactly these fields:
+  "title": string
+  "summary": string
+"""
 
 class DigestAgent:
     def __init__(self):
@@ -50,31 +62,16 @@ class DigestAgent:
                 ],
                 temperature=0.7,
                 response_format={
-                    "type": "json_schema",
-                    "json_schema": {
-                        "name": "digest_output",
-                        "strict": True,
-                        "schema": {
-                            "type": "object",
-                            "properties": {
-                                "title": {
-                                    "type": "string"
-                                },
-                                "summary": {
-                                    "type": "string"
-                                },
-                            },
-                            "required": [
-                                "title",
-                                "summary"
-                            ],
-                            "additionalProperties": False,
-                        },
-                    },
+                    "type": "json_object"
                 },
             )
 
             content = response.choices[0].message.content
+
+
+            print("\n========== RAW MODEL RESPONSE ==========")
+            print(content)
+            print("========================================\n")
 
             if not content:
                 return None
