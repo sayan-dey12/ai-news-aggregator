@@ -109,6 +109,48 @@ Interests:
 
 Preferences:
 {preferences_text}
+
+OUTPUT REQUIREMENTS:
+
+Return ONLY a valid JSON object.
+
+DO NOT return Markdown.
+DO NOT use headings.
+DO NOT use bullet points.
+DO NOT use tables.
+DO NOT use ```json code fences.
+DO NOT include any explanation before or after the JSON.
+
+The output MUST have exactly this structure:
+
+{{
+  "articles": [
+    {{
+      "digest_id": "openai:example-id",
+      "relevance_score": 9.5,
+      "rank": 1,
+      "reasoning": "Brief explanation of relevance."
+    }}
+  ]
+}}
+
+{{
+  "articles": [
+    {{
+      "digest_id": "anthropic:example-id",
+      "relevance_score": 9.1,
+      "rank": 2,
+      "reasoning": "Brief explanation of relevance."
+    }}
+  ]
+}}
+
+
+The "articles" array MUST contain exactly one item for every digest provided.
+
+There are exactly 8 digests, so return exactly 8 ranking objects.
+
+Ranks must be unique integers from 1 to 8.
 """
 
     def rank_digests(
@@ -164,6 +206,10 @@ Rank the articles from most relevant to least relevant.
             )
 
             content = response.choices[0].message.content
+            
+            # print("\n========== RAW CURATOR RESPONSE ==========")
+            # print(repr(content))
+            # print("==========================================\n")
 
             if not content:
                 return []

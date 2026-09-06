@@ -20,7 +20,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-def curate_digests(hours: int = 24) -> dict[str, Any]:
+def curate_digests(hours: int = 240) -> dict[str, Any]:
     """
     Fetch recent digests and rank them according to the user's profile.
 
@@ -158,7 +158,7 @@ def curate_digests(hours: int = 24) -> dict[str, Any]:
 
 if __name__ == "__main__":
 
-    result = curate_digests(hours=24)
+    result = curate_digests(hours=240)
 
     print("\n=== Curation Results ===")
     print(f"Total digests: {result['total']}")
