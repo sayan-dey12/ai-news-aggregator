@@ -1,8 +1,12 @@
+import logging
 import requests
 from html_to_markdown import convert
 
+logger = logging.getLogger(__name__)
+
 
 class ContentConverter:
+
     def __init__(self, timeout: int = 30):
         self.timeout = timeout
 
@@ -29,9 +33,18 @@ class ContentConverter:
             markdown = result["content"]
 
             if not markdown or not markdown.strip():
+                logger.warning(
+                    "HTML to Markdown returned empty content: %s",
+                    url,
+                )
                 return None
 
             return markdown.strip()
 
-        except Exception:
+        except Exception as exc:
+            logger.exception(
+                "Failed to convert URL to Markdown: %s | %s",
+                url,
+                exc,
+            )
             return None
