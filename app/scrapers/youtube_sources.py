@@ -1,6 +1,8 @@
 from datetime import datetime, timedelta, timezone
 from typing import Optional
 import os
+import time
+import logging
 
 import feedparser
 from pydantic import BaseModel
@@ -11,6 +13,7 @@ from youtube_transcript_api._errors import (
 )
 from youtube_transcript_api.proxies import WebshareProxyConfig
 
+logger = logging.getLogger(__name__)
 
 class Transcript(BaseModel):
     text: str
@@ -58,26 +61,50 @@ class YouTubeScraper:
         return f"https://www.youtube.com/feeds/videos.xml?channel_id={channel_id}"
     
     
-    def get_transcript(self, video_id: str) -> Optional[Transcript]:
-        try:
-            transcript = self.transcript_api.fetch(video_id)
-            text = " ".join([snippet.text for snippet in transcript.snippets])
-            return Transcript(text=text)
-        except (TranscriptsDisabled, NoTranscriptFound):
-            # print(
-            #     f"[NO TRANSCRIPT] {video_id}: "
-            #     f"{type(e).__name__}: {e}"
-            # )
-            return None
+    def get_transcript(
+        self,
+        video_id: str,
+    ) -> Optional[Transcript]:
 
-        except Exception as e:
-            # print(
-            #     f"[ERROR] {video_id}: {type(e).__name__}: {e}"
-            #     f"{type(e).__name__}: {e}"
-            # )
-            return None
-    
-    
+        max_retries = 3
+        delay = 2
+
+        for attempt in range(1, max_retries + 1):
+            try:
+                transcript = self.transcript_api.fetch(video_id)
+
+                text = " ".join(
+                    snippet.text
+                    for snippet in transcript.snippets
+                )
+
+                return Transcript(text=text)
+
+            except (TranscriptsDisabled, NoTranscriptFound):
+                return None
+
+            except Exception as exc:
+                logger.warning(
+                    "Transcript attempt %d/%d failed for %s: %s",
+                    attempt,
+                    max_retries,
+                    video_id,
+                    exc,
+                )
+
+                if attempt == max_retries:
+                    logger.exception(
+                        "Failed to fetch transcript for %s after %d attempts",
+                        video_id,
+                        max_retries,
+                    )
+                    return None
+
+                time.sleep(delay)
+                delay *= 2
+
+        return None
+        
     def get_latest_videos(
         self,
         channel_id: str,
