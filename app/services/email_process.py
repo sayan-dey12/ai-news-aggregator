@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 
 
 def generate_email_digest(
-    hours: int = 24,
+    hours: int = 240,
     top_n: int = 10,
 ) -> EmailDigestResponse:
 
@@ -122,7 +122,7 @@ def generate_email_digest(
 
 
 def send_digest_email(
-    hours: int = 24,
+    hours: int = 240,
     top_n: int = 10,
 ) -> dict:
 
@@ -207,7 +207,7 @@ def send_digest_email(
 if __name__ == "__main__":
 
     result = send_digest_email(
-        hours=24,
+        hours=240,
         top_n=10,
     )
 
