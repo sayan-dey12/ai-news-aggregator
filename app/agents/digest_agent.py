@@ -30,6 +30,29 @@ Guidelines:
 - Use clear, accessible language while maintaining technical accuracy.
 - Avoid marketing fluff and focus on substance.
 
+The provided Markdown may contain additional webpage elements such as:
+
+- navigation menus
+- headers and footers
+- cookie notices
+- subscription prompts
+- author information
+- social sharing links
+- related articles
+- recommended content
+- legal/privacy text
+- website metadata
+- repeated headings or navigation elements
+
+Ignore these elements.
+
+Use only the actual article content when generating the digest.
+Do not summarize navigation, promotional content, related articles,
+website chrome, or other non-article material.
+
+If the Markdown contains multiple sections, identify the main article
+and base the digest primarily on that article.
+
 YouTube-specific instructions:
 
 - Some YouTube videos may not have a transcript.

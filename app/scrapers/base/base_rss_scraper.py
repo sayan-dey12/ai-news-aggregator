@@ -2,16 +2,20 @@ from datetime import datetime, timedelta, timezone
 from typing import List, Optional
 
 import feedparser
-from docling.document_converter import DocumentConverter
+#from docling.document_converter import DocumentConverter
 
 from app.scrapers.base.models import RSSArticle
+
+from app.services.content_converter import ContentConverter
+
 
 
 class BaseRSSScraper:
 
     def __init__(self, rss_urls: List[str]):
         self.rss_urls = rss_urls
-        self.converter = DocumentConverter()
+        #self.converter = DocumentConverter()
+        self.content_converter = ContentConverter()
 
     def get_articles(
         self,
@@ -91,9 +95,11 @@ class BaseRSSScraper:
     ) -> Optional[str]:
 
         try:
-            result = self.converter.convert(url)
+            # result = self.converter.convert(url)
 
-            return result.document.export_to_markdown()
+            # return result.document.export_to_markdown()
+        
+            return self.content_converter.url_to_markdown(url)
 
         except Exception:
             return None
