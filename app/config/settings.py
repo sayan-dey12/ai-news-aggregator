@@ -13,7 +13,7 @@ OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 
 OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
 
-LLM_MODEL = "nvidia/nemotron-3-ultra-550b-a55b:free"
+LLM_MODEL = "google/gemma-4-31b-it:free"
 
 
 # -------------------------
@@ -24,6 +24,9 @@ YOUTUBE_CHANNELS = [
     "UCn8ujwUInbJkBhffxqAPBVQ",  # Dave Ebbelaar
     "UCawZsQWqfGSbCI5yjkdVkTA",  # Matthew Berman
     "UChpleBmo18P08aKCIgti38g",  # Matt Wolfe
+    "UCKelCK4ZaO6HeEI1KQjqzWA",  # The AI Daily Brief: Artificial Intelligence News
+    "UCNJ1Ymd5yFuUPtn21xtRbbw",  # AI Explained
+    "UCbfYPyITQ-7l4upoX8nvctg",  # Two Minute Papers
 ]
 
 
