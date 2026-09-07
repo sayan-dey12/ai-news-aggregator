@@ -1,6 +1,4 @@
-import os
 from typing import Optional
-from openai import OpenAI
 from pydantic import BaseModel
 from dotenv import load_dotenv
 from app.agents.base.base_llm_agent import BaseLLMAgent
@@ -87,7 +85,6 @@ class DigestAgent(BaseLLMAgent):
     def __init__(self):
         super().__init__()
         
-        self.model = "minimax/minimax-m3:free"
         self.system_prompt = PROMPT
 
     def generate_digest(self, title: str, content: str, article_type: str) -> Optional[DigestOutput]:

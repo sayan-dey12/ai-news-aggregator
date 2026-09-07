@@ -13,7 +13,7 @@ OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 
 OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
 
-LLM_MODEL = "minimax/minimax-m3:free"
+LLM_MODEL = "nvidia/nemotron-3-ultra-550b-a55b:free"
 
 
 # -------------------------
