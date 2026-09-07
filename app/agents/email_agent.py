@@ -5,6 +5,8 @@ from typing import List, Optional
 from dotenv import load_dotenv
 from openai import OpenAI
 from pydantic import BaseModel, Field
+from app.agents.base.base_llm_agent import BaseLLMAgent
+
 
 load_dotenv()
 
@@ -76,12 +78,8 @@ Do not use markdown.
 
 class EmailAgent:
     def __init__(self, user_profile: dict):
-        self.client = OpenAI(
-            api_key=os.getenv("OPENROUTER_API_KEY"),
-            base_url="https://openrouter.ai/api/v1",
-        )
-
-        self.model = "minimax/minimax-m3:free"
+        super().__init__()
+        
         self.user_profile = user_profile
 
     def generate_introduction(
