@@ -76,7 +76,7 @@ Do not use markdown.
 """
 
 
-class EmailAgent:
+class EmailAgent(BaseLLMAgent):
     def __init__(self, user_profile: dict):
         super().__init__()
         
