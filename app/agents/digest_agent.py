@@ -3,6 +3,8 @@ from typing import Optional
 from openai import OpenAI
 from pydantic import BaseModel
 from dotenv import load_dotenv
+from app.agents.base.base_llm_agent import BaseLLMAgent
+
 
 load_dotenv()
 
@@ -58,12 +60,10 @@ OUTPUT REQUIREMENTS:
   "title": string
   "summary": string
 """
-class DigestAgent:
+class DigestAgent(BaseLLMAgent):
     def __init__(self):
-        self.client = OpenAI(
-            api_key=os.getenv("OPENROUTER_API_KEY"),
-            base_url="https://openrouter.ai/api/v1"
-        )
+        super().__init__()
+        
         self.model = "minimax/minimax-m3:free"
         self.system_prompt = PROMPT
 
