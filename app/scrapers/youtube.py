@@ -152,11 +152,12 @@ if __name__ == "__main__":
     #result = scraper.scrape_channel("UCn8ujwUInbJkBhffxqAPBVQ")
     #result = scraper.scrape_channel("UCawZsQWqfGSbCI5yjkdVkTA")
     
-    # result = scraper.get_latest_videos("UCawZsQWqfGSbCI5yjkdVkTA" , hours=24)
+    # result = scraper.get_latest_videos("UCawZsQWqfGSbCI5yjkdVkTA" , hours=80)
     # print(len(result))
+    # print(result)
     
-    result_transcript = scraper.get_transcript("xdXLzFzxA9Q")
-    print(result_transcript)
+    # result_transcript = scraper.get_transcript("xdXLzFzxA9Q")
+    # print(result_transcript)
     
     # for video in result:
     #     print("=" * 80)
