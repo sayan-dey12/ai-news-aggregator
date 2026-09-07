@@ -51,25 +51,37 @@ def run_scrapers(hours: int = 24) -> dict[str, Any]:
 
     youtube_scraper = YOUTUBE_SOURCE.scraper_class()
 
-    videos = youtube_scraper.scrape_channels(
-        channel_ids=YOUTUBE_SOURCE.channel_ids,
-        hours=hours,
-    )
+    youtube_scraped = 0
+    youtube_created = 0
 
-    video_dicts = [
-        video.model_dump()
-        for video in videos
-    ]
+    for channel_id in YOUTUBE_SOURCE.channel_ids:
 
-    created = repo.bulk_create(
-        model=YOUTUBE_SOURCE.model,
-        items=video_dicts,
-        unique_field=YOUTUBE_SOURCE.unique_field,
-    )
+        videos = youtube_scraper.get_latest_videos(
+            channel_id=channel_id,
+            hours=hours,
+        )
+
+        youtube_scraped += len(videos)
+
+        video_dicts = [
+            {
+                **video.model_dump(),
+                "channel_id": channel_id,
+            }
+            for video in videos
+        ]
+
+        created = repo.bulk_create(
+            model=YOUTUBE_SOURCE.model,
+            items=video_dicts,
+            unique_field=YOUTUBE_SOURCE.unique_field,
+        )
+
+        youtube_created += created
 
     results[YOUTUBE_SOURCE.name] = {
-        "scraped": len(videos),
-        "created": created,
+        "scraped": youtube_scraped,
+        "created": youtube_created,
     }
 
     return results
