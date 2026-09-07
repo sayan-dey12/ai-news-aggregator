@@ -173,25 +173,48 @@ class Repository:
         articles = []
         seen_ids = set()
         
+        #existing digests
         digests = self.session.query(Digest).all()
         for d in digests:
             seen_ids.add(f"{d.article_type}:{d.article_id}")
         
-        youtube_videos = self.session.query(YouTubeVideo).filter(
-            YouTubeVideo.transcript.isnot(None),
-            YouTubeVideo.transcript != "__UNAVAILABLE__"
-        ).all()
+        #youtube videos
+        youtube_videos = self.session.query(YouTubeVideo).all()
+        
         for video in youtube_videos:
             key = f"youtube:{video.video_id}"
-            if key not in seen_ids:
-                articles.append({
-                    "type": "youtube",
-                    "id": video.video_id,
-                    "title": video.title,
-                    "url": video.url,
-                    "content": video.transcript or video.description or "",
-                    "published_at": video.published_at
-                })
+            
+            if key in seen_ids:
+                continue
+
+            if video.transcript and video.transcript != "__UNAVAILABLE__":
+                content = video.transcript
+                content_source = "transcript"
+
+            elif video.transcript == "__UNAVAILABLE__":
+                content = f"""
+Title: {video.title}
+
+Transcript not available.
+
+Description:
+{video.description or "No description available."}
+        """
+                content_source = "description"
+
+            else:
+                continue
+
+            articles.append({
+                "type": "youtube",
+                "id": video.video_id,
+                "title": video.title,
+                "url": video.url,
+                "content": content,
+                "content_source": content_source,
+                "published_at": video.published_at
+            })
+            
         
         openai_articles = self.session.query(OpenAIArticle).all()
         for article in openai_articles:
