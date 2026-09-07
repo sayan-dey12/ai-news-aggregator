@@ -30,7 +30,9 @@ class ContentConverter:
 
             result = convert(response.text)
 
-            markdown = result["content"]
+            # markdown = result["content"]
+            
+            markdown = result.content
 
             if not markdown or not markdown.strip():
                 logger.warning(
