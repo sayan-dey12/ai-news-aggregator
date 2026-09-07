@@ -1,6 +1,6 @@
 from typing import Optional
 
-from app.scrapers.openai import OpenAIScraper
+from app.scrapers.openai_sources import OpenAIScraper
 from app.database.repository import Repository
 
 

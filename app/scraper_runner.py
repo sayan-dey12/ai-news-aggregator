@@ -1,8 +1,8 @@
 
-from app.scrapers.anthropic import AnthropicScraper
-from app.scrapers.openai import OpenAIScraper
-from app.scrapers.youtube import YouTubeScraper
-from app.config import YOUTUBE_CHANNELS
+from app.scrapers.anthropic_sources import AnthropicScraper
+from app.scrapers.openai_sources import OpenAIScraper
+from app.scrapers.youtube_sources import YouTubeScraper
+from app.config.settings import YOUTUBE_CHANNELS
 from app.database.repository import Repository
 
 

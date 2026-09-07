@@ -1,6 +1,6 @@
 from typing import Optional
 
-from app.scrapers.anthropic import AnthropicScraper
+from app.scrapers.anthropic_sources import AnthropicScraper
 from app.database.repository import Repository
 
 

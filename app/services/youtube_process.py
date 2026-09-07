@@ -1,6 +1,6 @@
 from typing import Optional
 
-from app.scrapers.youtube import YouTubeScraper
+from app.scrapers.youtube_sources import YouTubeScraper
 from app.database.repository import Repository
 
 
