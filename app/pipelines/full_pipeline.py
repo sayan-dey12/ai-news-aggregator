@@ -13,10 +13,10 @@ logger = logging.getLogger(__name__)
 
 
 def run_full_pipeline(
-    hours: int = 150,
+    hours: int = 24,
     content_limit: Optional[int] = None,
     digest_limit: Optional[int] = None,
-    digest_hours: int = 240,
+    digest_hours: int = 24,
     top_n: int = 10,
     send_email: bool = True,
 ) -> dict[str, Any]:
@@ -135,10 +135,10 @@ if __name__ == "__main__":
     )
 
     result = run_full_pipeline(
-        hours=150,
+        hours=15,
         content_limit=None,
         digest_limit=None,
-        digest_hours=240,
+        digest_hours=24,
         top_n=10,
         send_email=True,
     )
