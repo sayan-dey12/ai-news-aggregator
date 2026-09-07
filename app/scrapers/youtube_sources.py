@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime, timedelta, timezone
 from typing import Optional
 import os
@@ -10,6 +11,9 @@ from youtube_transcript_api._errors import (
     TranscriptsDisabled,
 )
 from youtube_transcript_api.proxies import WebshareProxyConfig
+
+
+logger = logging.getLogger(__name__)
 
 
 class Transcript(BaseModel):
@@ -125,16 +129,121 @@ class YouTubeScraper:
     
     
     def scrape_channel(self, channel_id: str, hours: int = 150) -> list[ChannelVideo]:
+        
+        logger.info(
+            "Scraping YouTube channel: %s",
+            channel_id,
+        )
+        
         videos = self.get_latest_videos(channel_id, hours)
         result = []
         for video in videos:
-            transcript = self.get_transcript(video.video_id)
-            result.append(
-                video.model_copy(
-                    update={"transcript": transcript.text if transcript else None}
+            try:     
+                transcript = self.get_transcript(video.video_id)
+                result.append(
+                    video.model_copy(
+                        update={"transcript": transcript.text if transcript else None}
+                    )
                 )
+                
+            except Exception as exc:
+                logger.exception(
+                    "Failed processing video %s "
+                    "from channel %s: %s",
+                    video.video_id,
+                    channel_id,
+                    exc,
+                )
+
+                # Keep the video even when transcript
+                # processing fails.
+                result.append(video)
+        
+        logger.info(
+            "Channel %s completed: %d videos",
+            channel_id,
+            len(result),
+        )
+
+        return result        
+                
+        
+    
+    def scrape_channels(
+        self,
+        channel_ids: list[str],
+        hours: int = 150,
+    ) -> list[ChannelVideo]:
+        """
+        Scrape multiple YouTube channels independently.
+
+        Failure of one channel does not affect the others.
+        """
+
+        all_videos = []
+        seen_video_ids = set()
+
+        logger.info(
+            "Starting YouTube scraping for %d channels",
+            len(channel_ids),
+        )
+
+        for index, channel_id in enumerate(
+            channel_ids,
+            start=1,
+        ):
+            logger.info(
+                "[%d/%d] Processing YouTube channel %s",
+                index,
+                len(channel_ids),
+                channel_id,
             )
-        return result
+
+            try:
+                videos = self.scrape_channel(
+                    channel_id=channel_id,
+                    hours=hours,
+                )
+
+                for video in videos:
+                    if video.video_id in seen_video_ids:
+                        continue
+
+                    seen_video_ids.add(video.video_id)
+                    all_videos.append(video)
+
+                logger.info(
+                    "[%d/%d] Channel %s succeeded: "
+                    "%d videos",
+                    index,
+                    len(channel_ids),
+                    channel_id,
+                    len(videos),
+                )
+
+            except Exception as exc:
+                logger.exception(
+                    "[%d/%d] Failed to scrape "
+                    "YouTube channel %s: %s",
+                    index,
+                    len(channel_ids),
+                    channel_id,
+                    exc,
+                )
+
+                # IMPORTANT:
+                # Do not raise.
+                # Continue with the next channel.
+                continue
+
+        logger.info(
+            "YouTube scraping complete: "
+            "%d videos collected from %d channels",
+            len(all_videos),
+            len(channel_ids),
+        )
+
+        return all_videos
 
 
 if __name__ == "__main__":
