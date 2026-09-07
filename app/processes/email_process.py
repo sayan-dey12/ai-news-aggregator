@@ -10,7 +10,7 @@ from app.agents.curator_agent import CuratorAgent
 from app.profiles.user_profile import USER_PROFILE
 from app.database.repository import Repository
 from app.services.email import EmailService
-from app.services.email_template import digest_to_html
+from app.templates.email_template import digest_to_html
 
 
 logging.basicConfig(
