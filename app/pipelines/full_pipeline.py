@@ -5,7 +5,7 @@ from app.pipelines.scraper_runner import run_scrapers
 from app.processors.markdown_processor import process_markdown
 from app.processors.transcript_processor import process_youtube_transcripts
 from app.processors.digest_processor import process_digests
-from app.processes.curator_process import curate_digests
+from app.processors.curation_processor import curate_digests
 from app.processes.email_process import send_digest_email
 
 
@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 
 def run_full_pipeline(
-    hours: int = 48,
+    hours: int = 150,
     content_limit: Optional[int] = None,
     digest_limit: Optional[int] = None,
     digest_hours: int = 240,
@@ -135,7 +135,7 @@ if __name__ == "__main__":
     )
 
     result = run_full_pipeline(
-        hours=48,
+        hours=150,
         content_limit=None,
         digest_limit=None,
         digest_hours=240,
