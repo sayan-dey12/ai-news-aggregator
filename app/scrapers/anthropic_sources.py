@@ -1,13 +1,7 @@
 from app.scrapers.base.base_rss_scraper import BaseRSSScraper
-
+from app.config.sources import ANTHROPIC_RSS_URLS
 
 class AnthropicScraper(BaseRSSScraper):
 
     def __init__(self):
-        super().__init__(
-            rss_urls=[
-                "https://raw.githubusercontent.com/Olshansk/rss-feeds/main/feeds/feed_anthropic_news.xml",
-                "https://raw.githubusercontent.com/Olshansk/rss-feeds/main/feeds/feed_anthropic_research.xml",
-                "https://raw.githubusercontent.com/Olshansk/rss-feeds/main/feeds/feed_anthropic_engineering.xml",
-            ]
-        )
+        super().__init__(rss_urls=ANTHROPIC_RSS_URLS)
