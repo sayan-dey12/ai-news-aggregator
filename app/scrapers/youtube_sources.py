@@ -10,6 +10,7 @@ from youtube_transcript_api import YouTubeTranscriptApi
 from youtube_transcript_api._errors import (
     NoTranscriptFound,
     TranscriptsDisabled,
+    IpBlocked,
 )
 from youtube_transcript_api.proxies import WebshareProxyConfig
 
@@ -82,8 +83,34 @@ class YouTubeScraper:
 
             except (TranscriptsDisabled, NoTranscriptFound):
                 return None
+            
+            except IpBlocked as exc:
+                logger.error(
+                    "IP blocked while fetching transcript for %s: %s",
+                    video_id,
+                    exc,
+                )
+                return None
 
             except Exception as exc:
+                
+                error_message = str(exc).lower()
+                
+                # YouTube is rate-limiting/blocking the IP.
+                # Do not retry this request.
+                if (
+                    "429" in error_message
+                    or "too many 429" in error_message
+                    or "too many requests" in error_message
+                ):
+                    logger.error(
+                        "YouTube rate limit/IP block detected for %s. "
+                        "Not retrying: %s",
+                        video_id,
+                        exc,
+                    )
+                    return None
+                
                 logger.warning(
                     "Transcript attempt %d/%d failed for %s: %s",
                     attempt,
@@ -92,6 +119,7 @@ class YouTubeScraper:
                     exc,
                 )
 
+                # Other errors are considered retryable.
                 if attempt == max_retries:
                     logger.exception(
                         "Failed to fetch transcript for %s after %d attempts",
