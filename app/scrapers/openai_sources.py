@@ -1,5 +1,5 @@
 from app.scrapers.base.base_rss_scraper import BaseRSSScraper
-from app.config.sources import OPENAI_RSS_URLS
+from app.config.settings import OPENAI_RSS_URLS
 
 class OpenAIScraper(BaseRSSScraper):
 

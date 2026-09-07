@@ -1,17 +1,17 @@
 from dataclasses import dataclass
 from typing import Type
 
+from app.config.settings import YOUTUBE_CHANNELS
+
 from app.database.models import (
-    OpenAIArticle,
     AnthropicArticle,
+    OpenAIArticle,
     YouTubeVideo,
 )
 
-from app.scrapers.openai_sources import OpenAIScraper
 from app.scrapers.anthropic_sources import AnthropicScraper
+from app.scrapers.openai_sources import OpenAIScraper
 from app.scrapers.youtube_sources import YouTubeScraper
-
-from app.config.settings import YOUTUBE_CHANNELS
 
 
 @dataclass(frozen=True)
@@ -38,7 +38,6 @@ RSS_SOURCES = (
         model=OpenAIArticle,
         unique_field="guid",
     ),
-
     RSSSource(
         name="anthropic",
         scraper_class=AnthropicScraper,
@@ -55,16 +54,3 @@ YOUTUBE_SOURCE = YouTubeSource(
     unique_field="video_id",
     channel_ids=tuple(YOUTUBE_CHANNELS),
 )
-
-
-
-
-ANTHROPIC_RSS_URLS = [
-    "https://raw.githubusercontent.com/Olshansk/rss-feeds/main/feeds/feed_anthropic_news.xml",
-    "https://raw.githubusercontent.com/Olshansk/rss-feeds/main/feeds/feed_anthropic_research.xml",
-    "https://raw.githubusercontent.com/Olshansk/rss-feeds/main/feeds/feed_anthropic_engineering.xml",
-]
-
-OPENAI_RSS_URLS = [
-    "https://openai.com/news/rss.xml",
-]

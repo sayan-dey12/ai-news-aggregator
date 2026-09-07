@@ -209,25 +209,24 @@ class Repository:
     # Articles without digest
     # ==========================================================
 
+    
     def get_articles_without_digest(
         self,
         limit: Optional[int] = None,
     ) -> List[Dict[str, Any]]:
 
         articles = []
-        seen_ids = set()
 
-        # Existing digests
-        digests = self.session.query(Digest).all()
+        existing_digests = self.session.query(Digest).all()
 
-        for digest in digests:
-            seen_ids.add(
-                f"{digest.article_type}:{digest.article_id}"
-            )
+        seen_ids = {
+            f"{digest.article_type}:{digest.article_id}"
+            for digest in existing_digests
+        }
 
-        # ------------------------------------------------------
+        # ==========================================================
         # YouTube
-        # ------------------------------------------------------
+        # ==========================================================
 
         youtube_videos = self.session.query(YouTubeVideo).all()
 
@@ -246,14 +245,12 @@ class Repository:
                 content_source = "transcript"
 
             elif video.transcript == "__UNAVAILABLE__":
-                content = f"""
-Title: {video.title}
-
-Transcript not available.
-
-Description:
-{video.description or "No description available."}
-"""
+                content = (
+                    f"Title: {video.title}\n\n"
+                    f"Transcript not available.\n\n"
+                    f"Description:\n"
+                    f"{video.description or 'No description available.'}"
+                )
                 content_source = "description"
 
             else:
@@ -269,11 +266,13 @@ Description:
                 "published_at": video.published_at,
             })
 
-        # ------------------------------------------------------
+        # ==========================================================
         # OpenAI
-        # ------------------------------------------------------
+        # ==========================================================
 
-        openai_articles = self.session.query(OpenAIArticle).all()
+        openai_articles = self.session.query(
+            OpenAIArticle
+        ).all()
 
         for article in openai_articles:
 
@@ -282,13 +281,7 @@ Description:
             if key in seen_ids:
                 continue
 
-            content = (
-                article.markdown
-                or article.description
-                or ""
-            )
-
-            if not content:
+            if not article.markdown:
                 continue
 
             articles.append({
@@ -296,24 +289,18 @@ Description:
                 "id": article.guid,
                 "title": article.title,
                 "url": article.url,
-                "content": content,
-                "content_source": (
-                    "markdown"
-                    if article.markdown
-                    else "description"
-                ),
+                "content": article.markdown,
+                "content_source": "markdown",
                 "published_at": article.published_at,
             })
 
-        # ------------------------------------------------------
+        # ==========================================================
         # Anthropic
-        # ------------------------------------------------------
+        # ==========================================================
 
-        anthropic_articles = (
-            self.session
-            .query(AnthropicArticle)
-            .all()
-        )
+        anthropic_articles = self.session.query(
+            AnthropicArticle
+        ).all()
 
         for article in anthropic_articles:
 
@@ -322,13 +309,7 @@ Description:
             if key in seen_ids:
                 continue
 
-            content = (
-                article.markdown
-                or article.description
-                or ""
-            )
-
-            if not content:
+            if not article.markdown:
                 continue
 
             articles.append({
@@ -336,12 +317,8 @@ Description:
                 "id": article.guid,
                 "title": article.title,
                 "url": article.url,
-                "content": content,
-                "content_source": (
-                    "markdown"
-                    if article.markdown
-                    else "description"
-                ),
+                "content": article.markdown,
+                "content_source": "markdown",
                 "published_at": article.published_at,
             })
 
@@ -349,6 +326,7 @@ Description:
             articles = articles[:limit]
 
         return articles
+
 
     # ==========================================================
     # Digest

@@ -1,8 +1,8 @@
 from typing import Optional
 
+from app.config.content_sources import MARKDOWN_SOURCES
 from app.database.repository import Repository
 from app.processors.content_processor import process_missing_content
-from app.config.content_sources import MARKDOWN_SOURCES
 
 
 def process_markdown(
@@ -11,10 +11,18 @@ def process_markdown(
 ) -> dict:
 
     source = next(
-        source
-        for source in MARKDOWN_SOURCES
-        if source.name == source_name
+        (
+            source
+            for source in MARKDOWN_SOURCES
+            if source.name == source_name
+        ),
+        None,
     )
+
+    if source is None:
+        raise ValueError(
+            f"Unknown markdown source: {source_name}"
+        )
 
     repo = Repository()
     scraper = source.scraper_class()

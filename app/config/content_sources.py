@@ -1,17 +1,17 @@
 from dataclasses import dataclass
-from typing import Callable, Type
+from typing import Type
 
 from app.database.models import (
-    OpenAIArticle,
     AnthropicArticle,
+    OpenAIArticle,
 )
 
-from app.scrapers.openai_sources import OpenAIScraper
 from app.scrapers.anthropic_sources import AnthropicScraper
+from app.scrapers.openai_sources import OpenAIScraper
 
 
 @dataclass(frozen=True)
-class MarkdownSource:
+class ContentSource:
     name: str
     model: Type
     unique_field: str
@@ -20,15 +20,14 @@ class MarkdownSource:
 
 
 MARKDOWN_SOURCES = (
-    MarkdownSource(
+    ContentSource(
         name="openai",
         model=OpenAIArticle,
         unique_field="guid",
         content_field="markdown",
         scraper_class=OpenAIScraper,
     ),
-
-    MarkdownSource(
+    ContentSource(
         name="anthropic",
         model=AnthropicArticle,
         unique_field="guid",
