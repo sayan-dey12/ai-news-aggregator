@@ -12,3 +12,8 @@ wheels/
 # environment
 .env
 example.env
+
+
+
+writer.py
+project_dump.txt
