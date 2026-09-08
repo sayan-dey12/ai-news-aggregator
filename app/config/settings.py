@@ -47,4 +47,45 @@ ANTHROPIC_RSS_URLS = [
 
 OPENAI_RSS_URLS = [
     "https://openai.com/news/rss.xml",
+    "https://openai.com/news/engineering/rss.xml",
+    "https://raw.githubusercontent.com/Olshansk/rss-feeds/main/feeds/feed_openai_developer.xml",
+    
 ]
+
+HUGGING_FACE_RSS_URLS = [
+    "https://huggingface.co/blog/feed.xml",
+]
+
+GOOGLE_URLS = [
+    "https://deepmind.google/blog/rss.xml",                                               # google deepmind
+    "https://raw.githubusercontent.com/Olshansk/rss-feeds/main/feeds/feed_google_ai.xml", # google developer blog - ai
+]
+
+META_AI_URLS = [
+    "https://raw.githubusercontent.com/Olshansk/rss-feeds/main/feeds/feed_meta_ai.xml",
+]
+
+MISTRAL_URLS = [
+    "https://raw.githubusercontent.com/Olshansk/rss-feeds/main/feeds/feed_mistral.xml",
+]
+
+XAI_URLS = [
+    "https://raw.githubusercontent.com/Olshansk/rss-feeds/main/feeds/feed_xainews.xml",
+]
+
+OLLAMA_URLS = [
+    "https://raw.githubusercontent.com/Olshansk/rss-feeds/main/feeds/feed_ollama.xml",
+]
+
+THE_BATCH_BY_DEEPLEARNING_AI_URLS = [
+    "https://raw.githubusercontent.com/Olshansk/rss-feeds/main/feeds/feed_the_batch.xml",
+]
+
+SIMON_WILLISONS_URLS = [
+    "https://simonwillison.net/atom/beats/tool/",
+]
+
+COHER_URLS = [
+    "https://raw.githubusercontent.com/Olshansk/rss-feeds/main/feeds/feed_cohere.xml",
+]
+
