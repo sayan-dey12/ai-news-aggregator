@@ -61,6 +61,12 @@ Important:
 - Base the ranking on the user's profile rather than general popularity.
 - Avoid giving higher scores simply because a topic is popular or
   comes from a well-known company.
+  
+CRITICAL:
+- Copy every digest ID EXACTLY.
+- Do not modify any character of a digest ID.
+- Do not create any new digest ID.
+- Do not omit any digest.
 """
 
 
