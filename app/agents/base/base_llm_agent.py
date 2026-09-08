@@ -1,9 +1,15 @@
 from openai import OpenAI
 
+# from app.config.settings import (
+#     OPENROUTER_API_KEY,
+#     OPENROUTER_BASE_URL,
+#     LLM_MODEL,
+# )
+
 from app.config.settings import (
-    OPENROUTER_API_KEY,
-    OPENROUTER_BASE_URL,
-    LLM_MODEL,
+    GEMINI_API_KEY,
+    GEMINI_BASE_URL,
+    LLM_MODEL
 )
 
 from .base_agent import BaseAgent
@@ -15,8 +21,8 @@ class BaseLLMAgent(BaseAgent):
         super().__init__()
 
         self.client = OpenAI(
-            api_key=OPENROUTER_API_KEY,
-            base_url=OPENROUTER_BASE_URL,
+            api_key=GEMINI_API_KEY,
+            base_url=GEMINI_BASE_URL,
         )
 
         self.model = LLM_MODEL
