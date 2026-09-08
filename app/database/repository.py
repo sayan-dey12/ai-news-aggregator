@@ -73,27 +73,33 @@ class Repository:
 
     def get_without_content(
         self,
-        model: Type,
-        content_field: str,
-        limit: Optional[int] = None,
-    ) -> list:
-        """
-        Generic query for records whose content field is NULL.
-        """
+        model,
+        content_field,
+        limit=None,
+        filters=None,
+    ):
+        session = self.session
 
-        field = getattr(model, content_field)
+        query = session.query(model)
 
-        query = (
-            self.session
-            .query(model)
-            .filter(field.is_(None))
+        content_column = getattr(model, content_field)
+
+        query = query.filter(
+            (content_column.is_(None)) |
+            (content_column == "")
         )
 
-        if limit is not None:
+        if filters:
+            for field, value in filters.items():
+                query = query.filter(
+                    getattr(model, field) == value
+                )
+
+        if limit:
             query = query.limit(limit)
 
         return query.all()
-
+    
     def update_content(
         self,
         model: Type,

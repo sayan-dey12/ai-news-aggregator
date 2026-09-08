@@ -1,8 +1,7 @@
 from app.database.connection import get_session
 from app.database.models import (
     Digest,
-    AnthropicArticle,
-    OpenAIArticle,
+    RSSArticle,
     YouTubeVideo,
 )
 
@@ -13,8 +12,7 @@ def reset_database():
 
     try:
         session.query(Digest).delete()
-        session.query(AnthropicArticle).delete()
-        session.query(OpenAIArticle).delete()
+        session.query(RSSArticle).delete()
         session.query(YouTubeVideo).delete()
 
         session.commit()

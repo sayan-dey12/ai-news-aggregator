@@ -37,6 +37,9 @@ def process_markdown(
             model=source.model,
             content_field="markdown",
             limit=limit,
+            filters={
+                "source": source.name,
+            },
         ),
 
         generate_content=lambda article: (
