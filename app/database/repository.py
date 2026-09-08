@@ -6,8 +6,7 @@ from sqlalchemy.orm import Session
 from .connection import get_session
 from .models import (
     YouTubeVideo,
-    OpenAIArticle,
-    AnthropicArticle,
+    RSSArticle,
     Digest,
 )
 
@@ -155,56 +154,84 @@ class Repository:
     # RSS compatibility methods
     # ==========================================================
 
-    def get_anthropic_articles_without_markdown(
+    # def get_anthropic_articles_without_markdown(
+    #     self,
+    #     limit: Optional[int] = None,
+    # ) -> List[AnthropicArticle]:
+
+    #     return self.get_without_content(
+    #         model=AnthropicArticle,
+    #         content_field="markdown",
+    #         limit=limit,
+    #     )
+
+    # def update_anthropic_article_markdown(
+    #     self,
+    #     guid: str,
+    #     markdown: str,
+    # ) -> bool:
+
+    #     return self.update_content(
+    #         model=AnthropicArticle,
+    #         unique_field="guid",
+    #         unique_value=guid,
+    #         content_field="markdown",
+    #         content=markdown,
+    #     )
+
+    # def get_openai_articles_without_markdown(
+    #     self,
+    #     limit: Optional[int] = None,
+    # ) -> List[OpenAIArticle]:
+
+    #     return self.get_without_content(
+    #         model=OpenAIArticle,
+    #         content_field="markdown",
+    #         limit=limit,
+    #     )
+
+    # def update_openai_article_markdown(
+    #     self,
+    #     guid: str,
+    #     markdown: str,
+    # ) -> bool:
+
+    #     return self.update_content(
+    #         model=OpenAIArticle,
+    #         unique_field="guid",
+    #         unique_value=guid,
+    #         content_field="markdown",
+    #         content=markdown,
+    #     )
+
+
+    def get_rss_articles_without_markdown(
         self,
         limit: Optional[int] = None,
-    ) -> List[AnthropicArticle]:
+    ) -> List[RSSArticle]:
 
         return self.get_without_content(
-            model=AnthropicArticle,
+            model=RSSArticle,
             content_field="markdown",
             limit=limit,
         )
 
-    def update_anthropic_article_markdown(
+
+    def update_rss_article_markdown(
         self,
         guid: str,
         markdown: str,
     ) -> bool:
 
         return self.update_content(
-            model=AnthropicArticle,
+            model=RSSArticle,
             unique_field="guid",
             unique_value=guid,
             content_field="markdown",
             content=markdown,
         )
-
-    def get_openai_articles_without_markdown(
-        self,
-        limit: Optional[int] = None,
-    ) -> List[OpenAIArticle]:
-
-        return self.get_without_content(
-            model=OpenAIArticle,
-            content_field="markdown",
-            limit=limit,
-        )
-
-    def update_openai_article_markdown(
-        self,
-        guid: str,
-        markdown: str,
-    ) -> bool:
-
-        return self.update_content(
-            model=OpenAIArticle,
-            unique_field="guid",
-            unique_value=guid,
-            content_field="markdown",
-            content=markdown,
-        )
-
+        
+    
     # ==========================================================
     # Articles without digest
     # ==========================================================
@@ -266,17 +293,73 @@ class Repository:
                 "published_at": video.published_at,
             })
 
+        # # ==========================================================
+        # # OpenAI
+        # # ==========================================================
+
+        # openai_articles = self.session.query(
+        #     OpenAIArticle
+        # ).all()
+
+        # for article in openai_articles:
+
+        #     key = f"openai:{article.guid}"
+
+        #     if key in seen_ids:
+        #         continue
+
+        #     if not article.markdown:
+        #         continue
+
+        #     articles.append({
+        #         "type": "openai",
+        #         "id": article.guid,
+        #         "title": article.title,
+        #         "url": article.url,
+        #         "content": article.markdown,
+        #         "content_source": "markdown",
+        #         "published_at": article.published_at,
+        #     })
+
+        # # ==========================================================
+        # # Anthropic
+        # # ==========================================================
+
+        # anthropic_articles = self.session.query(
+        #     AnthropicArticle
+        # ).all()
+
+        # for article in anthropic_articles:
+
+        #     key = f"anthropic:{article.guid}"
+
+        #     if key in seen_ids:
+        #         continue
+
+        #     if not article.markdown:
+        #         continue
+
+        #     articles.append({
+        #         "type": "anthropic",
+        #         "id": article.guid,
+        #         "title": article.title,
+        #         "url": article.url,
+        #         "content": article.markdown,
+        #         "content_source": "markdown",
+        #         "published_at": article.published_at,
+        #     })
+        
         # ==========================================================
-        # OpenAI
+        # RSS articles
         # ==========================================================
 
-        openai_articles = self.session.query(
-            OpenAIArticle
+        rss_articles = self.session.query(
+            RSSArticle
         ).all()
 
-        for article in openai_articles:
+        for article in rss_articles:
 
-            key = f"openai:{article.guid}"
+            key = f"rss:{article.guid}"
 
             if key in seen_ids:
                 continue
@@ -285,36 +368,9 @@ class Repository:
                 continue
 
             articles.append({
-                "type": "openai",
+                "type": "rss",
                 "id": article.guid,
-                "title": article.title,
-                "url": article.url,
-                "content": article.markdown,
-                "content_source": "markdown",
-                "published_at": article.published_at,
-            })
-
-        # ==========================================================
-        # Anthropic
-        # ==========================================================
-
-        anthropic_articles = self.session.query(
-            AnthropicArticle
-        ).all()
-
-        for article in anthropic_articles:
-
-            key = f"anthropic:{article.guid}"
-
-            if key in seen_ids:
-                continue
-
-            if not article.markdown:
-                continue
-
-            articles.append({
-                "type": "anthropic",
-                "id": article.guid,
+                "source": article.source,
                 "title": article.title,
                 "url": article.url,
                 "content": article.markdown,

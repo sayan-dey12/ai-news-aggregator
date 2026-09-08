@@ -56,12 +56,12 @@ HUGGING_FACE_RSS_URLS = [
     "https://huggingface.co/blog/feed.xml",
 ]
 
-GOOGLE_URLS = [
+GOOGLE_RSS_URLS = [
     "https://deepmind.google/blog/rss.xml",                                               # google deepmind
     "https://raw.githubusercontent.com/Olshansk/rss-feeds/main/feeds/feed_google_ai.xml", # google developer blog - ai
 ]
 
-META_AI_URLS = [
+META_AI_RSS_URLS = [
     "https://raw.githubusercontent.com/Olshansk/rss-feeds/main/feeds/feed_meta_ai.xml",
 ]
 
