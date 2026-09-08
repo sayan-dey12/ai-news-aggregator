@@ -13,13 +13,16 @@ OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 
 OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
 
+LLM_MODEL = "nvidia/nemotron-3-ultra-550b-a55b:free"
+
 #-------------------------------------------------------------
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
 GEMINI_BASE_URL = "https://generativelanguage.googleapis.com/v1beta/openai/"
 
-LLM_MODEL = "gemini-2.5-flash-lite"
+#LLM_MODEL = "gemini-3.6-flash"
+
 
 
 # -------------------------
