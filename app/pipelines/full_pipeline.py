@@ -2,10 +2,8 @@ import logging
 from typing import Any, Optional
 
 from app.pipelines.scraper_runner import run_scrapers
-from app.processors.markdown_processor import process_markdown
-from app.processors.transcript_processor import process_youtube_transcripts
-from app.processors.digest_processor import process_digests
-from app.processors.curation_processor import curate_digests
+from app.pipelines.content_runner import run_content_processing
+from app.pipelines.digest_runner import process_digests
 from app.processes.email_process import send_digest_email
 
 
@@ -13,10 +11,10 @@ logger = logging.getLogger(__name__)
 
 
 def run_full_pipeline(
-    hours: int = 24,
+    hours: int = 72,
     content_limit: Optional[int] = None,
     digest_limit: Optional[int] = None,
-    digest_hours: int = 24,
+    digest_hours: int = 72,
     top_n: int = 10,
     send_email: bool = True,
 ) -> dict[str, Any]:
@@ -36,47 +34,17 @@ def run_full_pipeline(
     )
 
     # ==========================================================
-    # 2. Process OpenAI Markdown
+    # 2. Process content
     # ==========================================================
 
     logger.info("=" * 70)
-    logger.info("STAGE 2A: PROCESSING OPENAI MARKDOWN")
+    logger.info("STAGE 2: PROCESSING CONTENT")
     logger.info("=" * 70)
 
-    results["openai_markdown"] = process_markdown(
-        source_name="openai",
-        limit=content_limit,
-    )
+    results["content"] = run_content_processing()
 
     # ==========================================================
-    # 3. Process Anthropic Markdown
-    # ==========================================================
-
-    logger.info("=" * 70)
-    logger.info("STAGE 2B: PROCESSING ANTHROPIC MARKDOWN")
-    logger.info("=" * 70)
-
-    results["anthropic_markdown"] = process_markdown(
-        source_name="anthropic",
-        limit=content_limit,
-    )
-
-    # ==========================================================
-    # 4. Process YouTube transcripts
-    # ==========================================================
-
-    logger.info("=" * 70)
-    logger.info("STAGE 2C: PROCESSING YOUTUBE TRANSCRIPTS")
-    logger.info("=" * 70)
-
-    results["youtube_transcripts"] = (
-        process_youtube_transcripts(
-            limit=content_limit
-        )
-    )
-
-    # ==========================================================
-    # 5. Generate digests
+    # 3. Generate digests
     # ==========================================================
 
     logger.info("=" * 70)
@@ -88,25 +56,22 @@ def run_full_pipeline(
     )
 
     # ==========================================================
-    # 6. Curate
-    # ==========================================================
-
-    logger.info("=" * 70)
-    logger.info("STAGE 4: CURATING DIGESTS")
-    logger.info("=" * 70)
-
-    results["curation"] = curate_digests(
-        hours=digest_hours
-    )
-
-    # ==========================================================
-    # 7. Send email
+    # 4. Generate and send email
+    #
+    # Email process internally:
+    #     - gets recent digests
+    #     - calls CuratorAgent
+    #     - matches ranked results with DB data
+    #     - calls EmailAgent
+    #     - sends through Resend
+    #
+    # Curation is NOT persisted.
     # ==========================================================
 
     if send_email:
 
         logger.info("=" * 70)
-        logger.info("STAGE 5: SENDING EMAIL")
+        logger.info("STAGE 4: GENERATING AND SENDING EMAIL")
         logger.info("=" * 70)
 
         results["email"] = send_digest_email(
@@ -118,6 +83,10 @@ def run_full_pipeline(
         logger.info(
             "Email sending disabled."
         )
+
+    # ==========================================================
+    # Complete
+    # ==========================================================
 
     logger.info("=" * 70)
     logger.info("FULL PIPELINE COMPLETE")
@@ -135,10 +104,10 @@ if __name__ == "__main__":
     )
 
     result = run_full_pipeline(
-        hours=15,
+        hours=72,
         content_limit=None,
         digest_limit=None,
-        digest_hours=24,
+        digest_hours=72,
         top_n=10,
         send_email=True,
     )

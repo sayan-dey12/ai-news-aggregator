@@ -2,18 +2,22 @@ from datetime import datetime, timedelta, timezone
 from typing import List, Optional
 
 import feedparser
+
 #from docling.document_converter import DocumentConverter
 
-from app.scrapers.base.models import RSSArticle
-
+from app.database.models import RSSArticle
 from app.services.content_converter import ContentConverter
-
 
 
 class BaseRSSScraper:
 
-    def __init__(self, rss_urls: List[str]):
+    def __init__(
+        self,
+        rss_urls: List[str],
+        source_name: str,
+    ):
         self.rss_urls = rss_urls
+        self.source_name = source_name
         #self.converter = DocumentConverter()
         self.content_converter = ContentConverter()
 
@@ -37,11 +41,14 @@ class BaseRSSScraper:
 
             for entry in feed.entries:
 
-                published_parsed = getattr(
-                    entry,
-                    "published_parsed",
-                    None,
+                published_parsed = entry.get(
+                    "published_parsed"
                 )
+
+                if not published_parsed:
+                    published_parsed = entry.get(
+                        "updated_parsed"
+                    )
 
                 if not published_parsed:
                     continue
@@ -59,6 +66,9 @@ class BaseRSSScraper:
                     entry.get("link", ""),
                 )
 
+                if not guid:
+                    continue
+
                 if guid in seen_guids:
                     continue
 
@@ -66,13 +76,14 @@ class BaseRSSScraper:
 
                 articles.append(
                     RSSArticle(
+                        guid=guid,
+                        source=self.source_name,
                         title=entry.get("title", ""),
+                        url=entry.get("link", ""),
                         description=entry.get(
                             "description",
                             "",
                         ),
-                        url=entry.get("link", ""),
-                        guid=guid,
                         published_at=published_time,
                         category=self._get_category(entry),
                     )
@@ -80,7 +91,10 @@ class BaseRSSScraper:
 
         return articles
 
-    def _get_category(self, entry) -> Optional[str]:
+    def _get_category(
+        self,
+        entry,
+    ) -> Optional[str]:
 
         tags = entry.get("tags", [])
 
@@ -96,10 +110,8 @@ class BaseRSSScraper:
 
         try:
             # result = self.converter.convert(url)
-
             # return result.document.export_to_markdown()
-        
+            
             return self.content_converter.url_to_markdown(url)
-
         except Exception:
             return None

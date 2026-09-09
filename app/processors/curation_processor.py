@@ -20,19 +20,118 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-def curate_digests(hours: int = 240) -> dict[str, Any]:
-    """
-    Fetch recent digests and rank them according to the user's profile.
+def validate_ranking(
+    digests: list[dict],
+    ranked_articles: list,
+) -> tuple[bool, str]:
 
-    This function is responsible for orchestration.
-    The CuratorAgent is responsible only for LLM-based ranking.
+    expected_ids = [digest["id"] for digest in digests]
+    returned_ids = [article.digest_id for article in ranked_articles]
+
+    expected_id_set = set(expected_ids)
+    returned_id_set = set(returned_ids)
+
+    # --------------------------------------------------
+    # Check number of results
+    # --------------------------------------------------
+
+    if len(ranked_articles) != len(digests):
+        return (
+            False,
+            f"Expected {len(digests)} ranked articles, "
+            f"but received {len(ranked_articles)}",
+        )
+
+    # --------------------------------------------------
+    # Check missing IDs
+    # --------------------------------------------------
+
+    missing_ids = expected_id_set - returned_id_set
+
+    if missing_ids:
+        return (
+            False,
+            f"Missing digest IDs: {missing_ids}",
+        )
+
+    # --------------------------------------------------
+    # Check unexpected IDs
+    # --------------------------------------------------
+
+    extra_ids = returned_id_set - expected_id_set
+
+    if extra_ids:
+        return (
+            False,
+            f"Unexpected digest IDs: {extra_ids}",
+        )
+
+    # --------------------------------------------------
+    # Check duplicate IDs
+    # --------------------------------------------------
+
+    if len(returned_ids) != len(set(returned_ids)):
+        duplicates = {
+            digest_id
+            for digest_id in returned_ids
+            if returned_ids.count(digest_id) > 1
+        }
+
+        return (
+            False,
+            f"Duplicate digest IDs: {duplicates}",
+        )
+
+    # --------------------------------------------------
+    # Check ranks
+    # --------------------------------------------------
+
+    expected_ranks = set(range(1, len(digests) + 1))
+    returned_ranks = [article.rank for article in ranked_articles]
+
+    # Duplicate ranks
+    if len(returned_ranks) != len(set(returned_ranks)):
+        duplicates = {
+            rank
+            for rank in returned_ranks
+            if returned_ranks.count(rank) > 1
+        }
+
+        return (
+            False,
+            f"Duplicate ranks: {duplicates}",
+        )
+
+    # Missing / invalid ranks
+    if set(returned_ranks) != expected_ranks:
+        return (
+            False,
+            f"Invalid ranks. "
+            f"Expected {expected_ranks}, "
+            f"received {set(returned_ranks)}",
+        )
+
+    return True, "Ranking is valid"
+
+
+def curate_digests(
+    hours: int = 240,
+) -> dict[str, Any]:
+
+    """
+    Fetch recent digests and rank them according to
+    the user's profile.
+
+    Curator results are intentionally NOT stored in the
+    database. They are returned in memory for the next
+    pipeline stage, such as the email agent.
     """
 
     repo = Repository()
     curator = CuratorAgent(USER_PROFILE)
 
     # --------------------------------------------------
-    # 1. Get recent digests from the database
+    # 1. Get recent digests
     # --------------------------------------------------
 
     digests = repo.get_recent_digests(hours=hours)
@@ -40,6 +139,7 @@ def curate_digests(hours: int = 240) -> dict[str, Any]:
     total = len(digests)
 
     if total == 0:
+
         logger.warning(
             "No digests found from the last %s hours",
             hours,
@@ -64,7 +164,10 @@ def curate_digests(hours: int = 240) -> dict[str, Any]:
     ranked_articles = curator.rank_digests(digests)
 
     if not ranked_articles:
-        logger.error("Curator agent returned no ranked articles")
+
+        logger.error(
+            "Curator agent returned no ranked articles"
+        )
 
         return {
             "total": total,
@@ -73,19 +176,31 @@ def curate_digests(hours: int = 240) -> dict[str, Any]:
         }
 
     # --------------------------------------------------
-    # 3. Validate the result
+    # 3. Strict validation
     # --------------------------------------------------
 
-    ranked_ids = {article.digest_id for article in ranked_articles}
-    digest_ids = {digest["id"] for digest in digests}
+    is_valid, validation_message = validate_ranking(
+        digests,
+        ranked_articles,
+    )
 
-    missing_ids = digest_ids - ranked_ids
+    if not is_valid:
 
-    if missing_ids:
-        logger.warning(
-            "Curator did not rank %d digest(s)",
-            len(missing_ids),
+        logger.error(
+            "Invalid curator result: %s",
+            validation_message,
         )
+
+        return {
+            "total": total,
+            "ranked": 0,
+            "articles": [],
+        }
+
+    logger.info(
+        "Curator validation successful: %s",
+        validation_message,
+    )
 
     # --------------------------------------------------
     # 4. Sort by rank
@@ -97,10 +212,13 @@ def curate_digests(hours: int = 240) -> dict[str, Any]:
     )
 
     # --------------------------------------------------
-    # 5. Log the top articles
+    # 5. Log ranked articles
     # --------------------------------------------------
 
-    logger.info("Successfully ranked %d articles", len(ranked_articles))
+    logger.info(
+        "Successfully ranked %d articles",
+        len(ranked_articles),
+    )
 
     logger.info("=== Top 10 Ranked Articles ===")
 
@@ -111,7 +229,9 @@ def curate_digests(hours: int = 240) -> dict[str, Any]:
 
     for article in ranked_articles[:10]:
 
-        digest = digest_lookup.get(article.digest_id)
+        digest = digest_lookup.get(
+            article.digest_id
+        )
 
         if not digest:
             continue
@@ -161,10 +281,17 @@ if __name__ == "__main__":
     result = curate_digests(hours=240)
 
     print("\n=== Curation Results ===")
-    print(f"Total digests: {result['total']}")
-    print(f"Ranked: {result['ranked']}")
+
+    print(
+        f"Total digests: {result['total']}"
+    )
+
+    print(
+        f"Ranked: {result['ranked']}"
+    )
 
     for article in result["articles"][:10]:
+
         print(
             f"Rank {article['rank']} | "
             f"Score: {article['relevance_score']:.1f} | "

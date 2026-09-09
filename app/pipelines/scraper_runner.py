@@ -4,6 +4,9 @@ from app.config.sources import (
     RSS_SOURCES,
     YOUTUBE_SOURCE,
 )
+
+from app.scrapers.base.base_rss_scraper import BaseRSSScraper
+
 from app.database.repository import Repository
 
 
@@ -25,12 +28,23 @@ def run_scrapers(hours: int = 24) -> dict[str, Any]:
 
     for source in RSS_SOURCES:
 
-        scraper = source.scraper_class()
+        scraper = source.scraper_class(
+            rss_urls=list(source.rss_urls),
+            source_name=source.name,
+        )
 
         articles = scraper.get_articles(hours=hours)
 
         article_dicts = [
-            article.model_dump()
+            {
+                "guid": article.guid,
+                "source": article.source,
+                "title": article.title,
+                "url": article.url,
+                "description": article.description,
+                "published_at": article.published_at,
+                "category": article.category,
+            }
             for article in articles
         ]
 

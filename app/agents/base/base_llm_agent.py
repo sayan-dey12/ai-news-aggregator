@@ -1,9 +1,15 @@
 from openai import OpenAI
 
+# from app.config.settings import (
+#     OPENROUTER_API_KEY,
+#     OPENROUTER_BASE_URL,
+#     LLM_MODEL,
+# )
+
 from app.config.settings import (
     OPENROUTER_API_KEY,
     OPENROUTER_BASE_URL,
-    LLM_MODEL,
+    LLM_MODEL
 )
 
 from .base_agent import BaseAgent

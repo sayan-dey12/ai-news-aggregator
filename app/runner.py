@@ -19,16 +19,16 @@ RUN_INTERVAL_SECONDS = 24 * 60 * 60
 
 def run_once() -> None:
     """
-    Reset the database data and run the complete pipeline once.
+    Reset the database and run the complete daily pipeline.
     """
 
     logger.info("=" * 70)
     logger.info("STARTING DAILY NEWS PIPELINE")
     logger.info("=" * 70)
 
-    # --------------------------------------------------
-    # 1. Clear previous data
-    # --------------------------------------------------
+    # ==========================================================
+    # 1. Reset previous data
+    # ==========================================================
 
     logger.info("Resetting database data...")
 
@@ -36,24 +36,24 @@ def run_once() -> None:
 
     logger.info("Database reset complete.")
 
-    # --------------------------------------------------
-    # 2. Run complete pipeline
-    # --------------------------------------------------
+    # ==========================================================
+    # 2. Run full pipeline
+    # ==========================================================
 
     logger.info("Starting full pipeline...")
 
     result = run_full_pipeline(
-        hours=72,
+        hours=24,
         content_limit=None,
         digest_limit=None,
-        digest_hours=72,
+        digest_hours=24,
         top_n=10,
         send_email=True,
     )
 
-    # --------------------------------------------------
-    # 3. Log result
-    # --------------------------------------------------
+    # ==========================================================
+    # 3. Log results
+    # ==========================================================
 
     logger.info("Daily pipeline completed.")
 
@@ -69,16 +69,18 @@ def run_once() -> None:
 
 def main() -> None:
     """
-    Run the full pipeline once every 24 hours.
+    Run the complete pipeline once every 24 hours.
     """
 
     logger.info("Daily runner started.")
+
     logger.info(
         "Pipeline will run once every %s hours.",
         RUN_INTERVAL_SECONDS // 3600,
     )
 
     while True:
+
         try:
             run_once()
 
