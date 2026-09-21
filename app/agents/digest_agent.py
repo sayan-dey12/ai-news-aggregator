@@ -1,17 +1,25 @@
+import json
+import logging
 from typing import Optional
-from pydantic import BaseModel
+
 from dotenv import load_dotenv
+from pydantic import BaseModel, ValidationError
+
 from app.agents.base.base_llm_agent import BaseLLMAgent
 
 
 load_dotenv()
+
+logger = logging.getLogger(__name__)
 
 
 class DigestOutput(BaseModel):
     title: str
     summary: str
 
-PROMPT = """You are an expert AI news analyst specializing in
+
+PROMPT = """
+You are an expert AI news analyst specializing in
 summarizing technical articles, research papers, and video content
 about artificial intelligence.
 
@@ -45,6 +53,7 @@ The provided Markdown may contain additional webpage elements such as:
 Ignore these elements.
 
 Use only the actual article content when generating the digest.
+
 Do not summarize navigation, promotional content, related articles,
 website chrome, or other non-article material.
 
@@ -78,19 +87,33 @@ OUTPUT REQUIREMENTS:
 - Do NOT include any explanation before or after the JSON.
 - The JSON must contain exactly these fields:
 
-  "title": string
-  "summary": string
+{
+  "title": "string",
+  "summary": "string"
+}
 """
+
+
 class DigestAgent(BaseLLMAgent):
+
     def __init__(self):
         super().__init__()
-        
         self.system_prompt = PROMPT
 
-    def generate_digest(self, title: str, content: str, article_type: str) -> Optional[DigestOutput]:
-        try:
-            user_prompt = f"Create a digest for this {article_type}: \n Title: {title} \n Content: {content[:8000]}"
+    def generate_digest(
+        self,
+        title: str,
+        content: str,
+        article_type: str,
+    ) -> Optional[DigestOutput]:
 
+        user_prompt = (
+            f"Create a digest for this {article_type}:\n\n"
+            f"Title: {title}\n\n"
+            f"Content:\n{content[:8000]}"
+        )
+
+        try:
             response = self.client.chat.completions.create(
                 model=self.model,
                 messages=[
@@ -105,22 +128,141 @@ class DigestAgent(BaseLLMAgent):
                 ],
                 temperature=0.7,
                 response_format={
-                    "type": "json_object"
+                    "type": "json_object",
                 },
             )
 
-            content = response.choices[0].message.content
+            # --------------------------------------------------
+            # 1. Validate response object
+            # --------------------------------------------------
 
-
-            # print("\n========== RAW MODEL RESPONSE ==========")
-            # print(content)
-            # print("========================================\n")
-
-            if not content:
+            if response is None:
+                logger.error(
+                    "LLM returned None response for article: %s",
+                    title,
+                )
                 return None
 
-            return DigestOutput.model_validate_json(content)
+            if not response.choices:
+                logger.error(
+                    "LLM returned no choices for article: %s",
+                    title,
+                )
+                return None
 
-        except Exception as e:
-            print(f"Error generating digest: {e}")
+            # --------------------------------------------------
+            # 2. Get message safely
+            # --------------------------------------------------
+
+            message = response.choices[0].message
+
+            if message is None:
+                logger.error(
+                    "LLM returned None message for article: %s",
+                    title,
+                )
+                return None
+
+            # --------------------------------------------------
+            # 3. Get content safely
+            # --------------------------------------------------
+
+            raw_content = message.content
+
+            if raw_content is None:
+                logger.error(
+                    "LLM returned None content for article: %s",
+                    title,
+                )
+
+                logger.debug(
+                    "Raw LLM message: %r",
+                    message,
+                )
+
+                return None
+
+            if not isinstance(raw_content, str):
+                logger.error(
+                    "Unexpected content type %s for article: %s",
+                    type(raw_content).__name__,
+                    title,
+                )
+                return None
+
+            raw_content = raw_content.strip()
+
+            if not raw_content:
+                logger.error(
+                    "LLM returned empty content for article: %s",
+                    title,
+                )
+                return None
+
+            # --------------------------------------------------
+            # 4. Parse JSON
+            # --------------------------------------------------
+
+            try:
+                data = json.loads(raw_content)
+            except json.JSONDecodeError as exc:
+                logger.error(
+                    "Invalid JSON returned for article '%s': %s",
+                    title,
+                    exc,
+                )
+
+                logger.debug(
+                    "Raw model output: %r",
+                    raw_content,
+                )
+
+                return None
+
+            # --------------------------------------------------
+            # 5. Validate expected structure
+            # --------------------------------------------------
+
+            try:
+                digest = DigestOutput.model_validate(data)
+            except ValidationError as exc:
+                logger.error(
+                    "Invalid digest structure for article '%s': %s",
+                    title,
+                    exc,
+                )
+
+                logger.debug(
+                    "Parsed model output: %r",
+                    data,
+                )
+
+                return None
+
+            # --------------------------------------------------
+            # 6. Final validation
+            # --------------------------------------------------
+
+            if not digest.title.strip():
+                logger.error(
+                    "Digest title is empty for article: %s",
+                    title,
+                )
+                return None
+
+            if not digest.summary.strip():
+                logger.error(
+                    "Digest summary is empty for article: %s",
+                    title,
+                )
+                return None
+
+            return digest
+
+        except Exception as exc:
+            logger.exception(
+                "Error generating digest for '%s': %s",
+                title,
+                exc,
+            )
             return None
