@@ -43,7 +43,7 @@ def run_once() -> None:
     logger.info("Starting full pipeline...")
 
     result = run_full_pipeline(
-        hours=24,
+        hours=72,
         content_limit=None,
         digest_limit=None,
         digest_hours=24,
