@@ -1,5 +1,4 @@
 import logging
-
 from typing import Optional
 
 from app.agents.digest_agent import DigestAgent
@@ -33,8 +32,10 @@ def process_digests(
         articles,
         start=1,
     ):
+
         article_type = article["type"]
         article_id = article["id"]
+
         content_source = article.get(
             "content_source",
             "unknown",
@@ -42,9 +43,11 @@ def process_digests(
 
         article_title = article["title"]
 
-        if len(article_title) > 60:
-            article_title = (
-                article_title[:60] + "..."
+        display_title = article_title
+
+        if len(display_title) > 60:
+            display_title = (
+                display_title[:60] + "..."
             )
 
         logger.info(
@@ -53,27 +56,44 @@ def process_digests(
             total,
             article_type,
             content_source,
-            article_title,
+            display_title,
         )
 
         try:
+
+            # --------------------------------------------------
+            # Generate digest
+            # --------------------------------------------------
+
             digest_result = agent.generate_digest(
                 title=article["title"],
                 content=article["content"],
                 article_type=article_type,
             )
 
-            if not digest_result:
+            # --------------------------------------------------
+            # LLM failed
+            # --------------------------------------------------
+
+            if digest_result is None:
+
                 failed += 1
 
                 logger.warning(
-                    "Failed to generate digest for "
-                    "%s %s",
+                    "[%d/%d] Digest generation failed for "
+                    "%s %s: %s",
+                    index,
+                    total,
                     article_type,
                     article_id,
+                    display_title,
                 )
 
                 continue
+
+            # --------------------------------------------------
+            # Persist digest
+            # --------------------------------------------------
 
             digest = repo.create_digest(
                 article_type=article_type,
@@ -86,35 +106,56 @@ def process_digests(
                 ),
             )
 
+            # --------------------------------------------------
+            # Database result
+            # --------------------------------------------------
+
             if digest:
+
                 processed += 1
 
                 logger.info(
-                    "Successfully created digest for "
-                    "%s %s",
+                    "[%d/%d] Successfully created digest "
+                    "for %s %s",
+                    index,
+                    total,
                     article_type,
                     article_id,
                 )
 
             else:
+
                 failed += 1
 
                 logger.warning(
-                    "Digest already exists for "
-                    "%s %s",
+                    "[%d/%d] Digest was not created "
+                    "for %s %s "
+                    "(possibly already exists)",
+                    index,
+                    total,
                     article_type,
                     article_id,
                 )
 
         except Exception as exc:
+
             failed += 1
 
             logger.exception(
-                "Error processing %s %s: %s",
+                "[%d/%d] Error processing %s %s: %s",
+                index,
+                total,
                 article_type,
                 article_id,
                 exc,
             )
+
+    logger.info(
+        "Digest processing complete: "
+        "%d processed, %d failed",
+        processed,
+        failed,
+    )
 
     return {
         "total": total,
