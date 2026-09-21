@@ -67,7 +67,7 @@ class YouTubeScraper:
         video_id: str,
     ) -> Optional[Transcript]:
 
-        max_retries = 3
+        max_retries = 1
         delay = 2
 
         for attempt in range(1, max_retries + 1):

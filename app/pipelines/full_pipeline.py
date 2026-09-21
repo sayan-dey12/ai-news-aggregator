@@ -104,10 +104,10 @@ if __name__ == "__main__":
     )
 
     result = run_full_pipeline(
-        hours=72,
+        hours=24,
         content_limit=None,
         digest_limit=None,
-        digest_hours=72,
+        digest_hours=24,
         top_n=10,
         send_email=True,
     )
